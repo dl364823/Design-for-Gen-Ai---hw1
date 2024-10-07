@@ -25,47 +25,21 @@ from pathlib import Path
 
 
 
-#Thid is the basic data representation
+#This is the basic data representation
 description_data = {
-  "description":"",
-  "seedwords":"",
-  "names":[],
-  "generations":[]
+  "prompt1": "",
+  "prompt2": "",
+  "prompt3": "",
+  "prompt4": "",
+  "names": [],
+  "generations": []
 }
 
-# This is what the representation looks like when there are keywords and images generated
-# sample_headline_data_2 = {
-#    "generations": [
-#       {
-#          "prompt": "Santos’s Lies Were Known to Some Well-Connected Republicans",
-#          "url": "static/generated_images/Santo-1673801357/Santo-1673801357-0.png"
-#       },
-#       {
-#          "prompt": "Santos’s Lies Were Known to Some Well-Connected Republicans",
-#          "url": "static/generated_images/Santo-1673801375/Santo-1673801375-0.png"
-#       }
-#    ],
-#    "headline": "Santos’s Lies Were Known to Some Well-Connected Republicans",
-#    "keywords": [
-#       "Santos",
-#       "Lying",
-#       "Republican",
-#       "2022",
-#       "Suspicion",
-#       "Campaign",
-#       "Upperechelons",
-#       "Republicans",
-#       "Turned a Blind Eye",
-#       "Connection"
-#    ],
-#    "summary": "George Santos inspired no shortage of suspicion during his 2022 campaign, including in the upper echelons of his own party, yet many Republicans looked the other way."
-# }
-
-
-
 sample_description_data_1 = {
-    "description": "A home milkshake maker",
-    "seedwords": "fast, healthy, compact.",
+    "prompt1": "simplicity, speed, innovation...",
+    "prompt2": "young people, professionals, families...",
+    "prompt3": "reliability, stylishness, technological edge...",
+    "prompt4": "short and simple, creative and unique, tech-oriented...",
     "names": [],
     "generations": [],
 }
@@ -74,66 +48,30 @@ sample_description_data_1 = {
 #### INIT with example data
 description_data = sample_description_data_1
 
-
-
-
-
-@app.route('/submit_description', methods=['GET', 'POST'])
-def submit_description():
+@app.route('/submit_prompts', methods=['GET', 'POST'])
+def submit_prompts():
     global description_data
     data = request.get_json()   
 
-    description_data["description"] = data["description"]
-    description_data["seedwords"] = data["seedwords"]
+    description_data["prompt1"] = data.get("prompt1", "")
+    description_data["prompt2"] = data.get("prompt2", "")
+    description_data["prompt3"] = data.get("prompt3", "")
+    description_data["prompt4"] = data.get("prompt4", "")
+    #description_data["keywords"] = data["keywords", ""]
 
     #send back the WHOLE array of data, so the client can redisplay it
-    return jsonify(headline_data)
-
-
-@app.route('/get_images', methods=['GET', 'POST'])
-def get_images():
-    global headline_data
-    data = request.get_json()   
-    # print(data)
-    prompt = data["prompt"]
-    new_images = generate_images(prompt)
-
-    for i in new_images:
-        headline_data["generations"].append(i) 
-
-    #just send new images
-    return jsonify(new_images)
-
-
-def generate_images(prompt):
-    response_image = client.images.generate(
-      prompt=prompt,
-      n=1,
-      size="256x256",
-    )
-
-    url = response_image.data[0].url
-
-    images = [
-        {
-            "prompt": prompt,
-            "url": url, #image_file.as_posix(),
-        }
-    ]
-    # print(url_for_flask)
-    return images
-
-
-
+    return jsonify(description_data)
 
 @app.route('/get_names', methods=['GET', 'POST'])
 def get_names():
     global description_data
+    prompt1 = description_data["prompt1"]
+    prompt2 = description_data["prompt2"]
+    prompt3 = description_data["prompt3"]
+    prompt4 = description_data["prompt4"]
+    description = f"{prompt1} {prompt2} {prompt3} {prompt4}"
 
-    description = description_data["description"]
-    seedwords = headline_data["seedwords"]
-
-    names = get_keywords_for_product(description, seedwords)
+    names = get_names_for_product(description)
     description_data["names"] = names
 
     #send back the WHOLE array of data, so the client can redisplay it
@@ -143,7 +81,7 @@ def get_names():
 def parse_names_from_gpt_response(name_response):
     name_list = name_response.splitlines()
     new_name_list = []
-    for i, item in enumerate(keyword_list):
+    for i, item in enumerate(name_list): 
         item = item.strip()
         if item != "":
             item = item[item.index(".") + 1:]
@@ -152,10 +90,13 @@ def parse_names_from_gpt_response(name_response):
     return new_name_list
 
 
-def get_names_for_product(description, seedwords):
-    prompt = "Give me 10 product names that represent the description and seedwords. and format it like this: \n 1. name1 \n 2.name2 \n 3. name three. Product description: "+description+". Product seedwords: "+seedwords+"."
+def get_names_for_product(description):
+    prompt = (
+        f"Give me 5 product names that represent the following description. "
+        f"Format it like this: \n 1. name1 \n 2. name2 \n 3. name three.\n"
+        f"Product description: {description}."
+    )
     print(prompt)
-
 
     response_raw = client.chat.completions.create(
       model="gpt-4o-mini",
@@ -166,7 +107,7 @@ def get_names_for_product(description, seedwords):
         }
       ],
       # temperature=0,
-      max_tokens=100,
+      max_tokens=256,
       # top_p=1,
       # frequency_penalty=0,
       # presence_penalty=0
@@ -185,6 +126,40 @@ def get_names_for_product(description, seedwords):
 
     return name_list
 
+@app.route('/get_images', methods=['GET', 'POST'])
+def get_images():
+    global description_data
+    data = request.get_json()   
+    # print(data)
+    name = data.get("name")
+    new_images = generate_images(name)
+
+    for i in new_images:
+        description_data["generations"].append(i) 
+
+    #just send new images
+    return jsonify(new_images)
+
+
+def generate_images(name):
+    prompt = f"Generate an image for the product name: {name}" 
+
+    response_image = client.images.generate(
+      prompt=prompt,
+      n=1,
+      size="256x256",
+    )
+
+    url = response_image.data[0].url
+
+    images = [
+        {
+            "prompt": name,
+            "url": url, #image_file.as_posix(),
+        }
+    ]
+    # print(url_for_flask)
+    return images
 
 @app.route('/')
 def home():
