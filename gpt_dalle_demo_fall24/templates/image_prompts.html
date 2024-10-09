@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <script>
+        $(function() {
+            // Submit the image prompts and logo count
+            $("#submit_image_prompts_btn").click(function() {
+                let prompt1 = $("#image_prompt1").val();
+                let prompt2 = $("#image_prompt2").val();
+                let prompt3 = $("#image_prompt3").val();
+                let prompt4 = $("#image_prompt4").val();
+                let logoCount = $("#logo_count").val();
+                let selected_name = "{{ selected_name }}";
+
+                submit_image_prompts(selected_name, prompt1, prompt2, prompt3, prompt4, logoCount);
+            });
+        });
+
+        function submit_image_prompts(selected_name, prompt1, prompt2, prompt3, prompt4, logoCount) {
+            let data = {
+                "selected_name": selected_name,
+                "image_prompt1": prompt1, 
+                "image_prompt2": prompt2, 
+                "image_prompt3": prompt3,
+                "image_prompt4": prompt4,
+                "logo_count": logoCount
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "/generate_logos",                
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(data),
+                beforeSend: function () { 
+                    $("#spinner-div").show()
+                }, 
+                success: function(data) {
+                    console.log("Logo generation response", data);
+                    // Redirect to the page where logos will be displayed or display them here
+                    window.location.href = "/view_logos";
+                },
+                error: function(request, status, error) {
+                    console.log("Error");
+                    console.log(request, status, error);
+                },
+                complete: function () { 
+                    $("#spinner-div").hide()
+                },
+            });
+        }
+    </script>
+
+    <div class="row mt-5">
+        <div class="col-lg-6 mx-auto">
+            <div class="card p-4 shadow-sm">
+                <h3 class="mb-4">Generate Product Logo for: {{ selected_name }}</h3>
+
+                <div class="form-group">
+                    <label>Image Prompt 1:</label>
+                    <textarea id="image_prompt1" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Image Prompt 2:</label>
+                    <textarea id="image_prompt2" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Image Prompt 3:</label>
+                    <textarea id="image_prompt3" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Image Prompt 4:</label>
+                    <textarea id="image_prompt4" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Number of Logos:</label>
+                    <input id="logo_count" type="number" class="form-control" min="1" max="10" value="1">
+                </div>
+                <button id="submit_image_prompts_btn" class="btn btn-primary">Generate Logos</button>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

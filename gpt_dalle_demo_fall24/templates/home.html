@@ -15,11 +15,9 @@
         
         $(function() {
             load_description_data()
-
         });
 
         function load_description_data(){
-            //load description 
             let prompt1 = description_data["prompt1"] || "";
             let prompt2 = description_data["prompt2"] || "";
             let prompt3 = description_data["prompt3"] || "";
@@ -30,18 +28,12 @@
             }else{
                 show_description_editing(description_data)
             }
-
-            // load names
+            
             let names = description_data["names"] || "";
             if(names.length > 0){
                 show_names(description_data)
             }
-
-             //load images
-            /*generations_list = description_data["generations"]
-            if(generations_list.length > 0){
-                show_generations(generations_list, true)
-            }*/         
+      
         }
 
         /*
@@ -104,8 +96,9 @@
         }
 
         function show_description_editing(data){
-            $("#edit_prompts_div").show()
-            $("#show_prompts_div").hide()
+            $("#edit_prompts_card").show()
+            $("#show_prompts_card").hide()
+            $("#names_to_select_card").hide();
 
             $("#prompt1_input").val(data["prompt1"])
             $("#prompt2_input").val(data["prompt2"])
@@ -114,8 +107,10 @@
         }
 
         function show_description(data){
-            $("#edit_prompts_div").hide()
-            $("#show_prompts_div").show()
+            $("#edit_prompts_card").hide()
+            $("#show_prompts_card").show()
+            $("#names_to_select_card").show();
+            
 
             $("#show_prompt1").text(data["prompt1"])
             $("#show_prompt2").text(data["prompt2"])
@@ -145,22 +140,15 @@
                 $("#display_names").append(nameButton);
             })
         }
-        
-        function select_name_for_image(name) {
-            console.log("Selected name: " + name);
-            generate_image(name);
-        }
 
         function get_names_gpt(){
-            // console.log(description)
-            // console.log(summary)
-            let data = {}//{"description":description,"summary":summary}
+            console.log("Sending request to /get_names");
             $.ajax({
                 type: "POST",
                 url: "/get_names",                
                 dataType : "json",
                 contentType: "application/json; charset=utf-8",
-                data : JSON.stringify(data),
+                data : JSON.stringify({}),
                 beforeSend: function () { 
                     $("#spinner-div").show()
                 },
@@ -181,130 +169,83 @@
                     $("#spinner-div").hide()
                 },
             }); 
-        }
+        }        
 
-        /*
-            IMAGE GENERATIONS
-        */
-
-        $(function() {
-            $("#get_images_description_btn").click(function(){
-                console.log("get_images_description_btn")
-                let prompt = description_data["description"]
-                get_images(prompt)
-            })
-
-            
-        });
-
-        function get_images(name){
-            let data = {"name":name}
+        function select_name_for_image(name) { 
             $.ajax({
                 type: "POST",
-                url: "/get_images",                
-                dataType : "json",
+                url: "/store_selected_name",  
+                dataType: "json",
                 contentType: "application/json; charset=utf-8",
-                data : JSON.stringify(data),
-                beforeSend: function () { 
-                    $("#spinner-div").show()
+                data: JSON.stringify({ "selected_name": name }),
+                success: function(response) {
+                    window.location.href = "/image_prompts";
                 },
-                success: function(data, text){
-                    console.log("get_images response")
-                    console.log(data)  
-                    let prompt = data["prompt"]
-                    let url = data["url"]
-
-                    let new_generations_list = data || []
-                        // for i in new_images:
-                    $.each(new_generations_list, function(i, gen) {
-                        description_data["generations"].push(gen) 
-                    })
-        
-
-                    // description_data["generations"].push(data)
-                    show_generations(description_data["generations"])
-
-                },
-                error: function(request, status, error){
-                    console.log("Error");
-                    console.log(request)
-                    console.log(status)
-                    console.log(error)
-                },
-                complete: function () { 
-                    $("#spinner-div").hide()
-                },
-            })
-        }
-
-
-        function show_generations(generations_list){             
-            $("#gallery").empty()
-
-            $.each(generations_list, function(i,item){
-                // console.log(item)
-                let id = item["id"]
-                let is_deleted = item["is_deleted"]
-                
-                if(is_deleted!="true"){
-                    let name = item["prompt"]
-                    let url = item["url"]
-
-                    let new_gen_div = $("<div id='"+id+"'><div>"+name+"</div><br><img src='"+url+"''></img></div>")
-
-                
-                    $("#gallery").append(new_gen_div)
+                error: function(request, status, error) {
+                    console.log("Error storing selected name", error);
                 }
-            })
+            });
         }
-        
-    </script>  
-
-    <div class="row">
-        <div id="explore_text" class="col-md-4" >
-            <!-- Edit Prompts Section -->
-            <div id="edit_prompts_div">                
-                    <label>Prompt 1:</label><br>
-                    <textarea id="prompt1_input" rows="2" cols="40"></textarea>
-                    <br>
-                    <label>Prompt 2:</label><br>
-                    <textarea id="prompt2_input" rows="4" cols="40"></textarea>
-                    <br>
-                    <label>Prompt 3:</label><br>
-                    <textarea id="prompt3_input" rows="4" cols="40"></textarea>
-                    <br>
-                    <label>Prompt 4:</label><br>
-                    <textarea id="prompt4_input" rows="4" cols="40"></textarea>
-                    <br>
-                    <button id="submit_prompts_btn" type="button">Submit</button>                
+    </script> 
+    <div class="container">
+        <div class="row mt-5">
+            <!-- Edit Prompts Section, initially hidden -->
+            <div class="col-lg-6 mx-auto" id="edit_prompts_card" style="display: none;">
+                <div class="card p-4 shadow-sm">
+                    <h3 class="mb-4">Edit Prompts</h3>
+                    <div id="edit_prompts_div">
+                        <div class="form-group">
+                            <label for="prompt1_input">Prompt 1:</label>
+                            <textarea id="prompt1_input" class="form-control" rows="2"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="prompt2_input">Prompt 2:</label>
+                            <textarea id="prompt2_input" class="form-control" rows="4"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="prompt3_input">Prompt 3:</label>
+                            <textarea id="prompt3_input" class="form-control" rows="4"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="prompt4_input">Prompt 4:</label>
+                            <textarea id="prompt4_input" class="form-control" rows="4"></textarea>
+                        </div>
+                        <button id="submit_prompts_btn" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
             </div>
-            <!-- Show Prompts Section -->
-            <div id="show_prompts_div">
-                    <h3>Submitted Prompts:</h3>
-                    <p><strong>Prompt 1: Please describe the core value and unique features of your product or service.</strong> <span id="show_prompt1"></span></p>
-                    <p><strong>Prompt 2: Who is your target audience?</strong> <span id="show_prompt2"></span></p>
-                    <p><strong>Prompt 3: What kind of emotion or impression would you like the product name to convey?</strong> <span id="show_prompt3"></span></p>
-                    <p><strong>Prompt 4: Are there any brand name styles you particularly like?</strong> <span id="show_prompt4"></span></p>
-                    <button id="edit_prompts_btn" type="button">Edit</button>
-            </div>
-        </div>
-
-        <div id="names_to_select" class="col-md-4">
-            <p><strong>Names </strong> <button type="button" id="get_names">Get Names</button></p>
-            <div id="display_names">
-     
-            </div>
-        </div>    
-
-
-        <div id="see_generations" class="col-md-4">
-            See Images <button id="get_images_description_btn" type="button">Get images for description</button>
-            <div class="row" id="gallery">
-                <!-- <img src="static/generated_images/Santo-1673729232/Santo-1673729232-0.png"> -->
+    
+            <!-- Row containing Submitted Prompts and Select a Name side by side -->
+            <div class="row mt-5">
+                <div class="col-md-6">
+                    <!-- Submitted Prompts Section -->
+                    <div class="card p-4 shadow-sm" id="show_prompts_card" style="display: none;">
+                        <h3 class="mb-4">Submitted Prompts</h3>
+                        <div id="show_prompts_div">
+                            <p><strong>Prompt 1: </strong><span id="show_prompt1"></span></p>
+                            <p><strong>Prompt 2: </strong><span id="show_prompt2"></span></p>
+                            <p><strong>Prompt 3: </strong><span id="show_prompt3"></span></p>
+                            <p><strong>Prompt 4: </strong><span id="show_prompt4"></span></p>
+                            <button id="edit_prompts_btn" class="btn btn-secondary">Edit</button>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Select a Name Section -->
+                <div class="col-md-6">
+                    <div class="card p-4 shadow-sm" id="names_to_select_card" style="display: none;">
+                        <h3 class="mb-4">Select a Name</h3>
+                        <div id="names_to_select">
+                            <p><strong>Names: </strong><button type="button" id="get_names" class="btn btn-info btn-sm">Get Names</button></p>
+                            <div id="display_names"></div>
+                            <p class="text-muted">Click your name and generate your image.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
-
+    
+    
 {% endblock %}
 

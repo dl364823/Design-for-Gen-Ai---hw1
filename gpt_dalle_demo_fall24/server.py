@@ -64,11 +64,12 @@ def submit_prompts():
 
 @app.route('/get_names', methods=['GET', 'POST'])
 def get_names():
+    print("Received request for /get_names")
     global description_data
-    prompt1 = description_data["prompt1"]
-    prompt2 = description_data["prompt2"]
-    prompt3 = description_data["prompt3"]
-    prompt4 = description_data["prompt4"]
+    prompt1 = description_data.get("prompt1", "")
+    prompt2 = description_data.get("prompt2", "")
+    prompt3 = description_data.get("prompt3", "")
+    prompt4 = description_data.get("prompt4", "")
     description = f"{prompt1} {prompt2} {prompt3} {prompt4}"
 
     names = get_names_for_product(description)
@@ -126,40 +127,66 @@ def get_names_for_product(description):
 
     return name_list
 
-@app.route('/get_images', methods=['GET', 'POST'])
-def get_images():
+@app.route('/store_selected_name', methods=['POST'])
+def store_selected_name():
     global description_data
-    data = request.get_json()   
+    data = request.get_json()
+    selected_name = data.get("selected_name", "No Name Selected")
+    description_data["selected_name"] = selected_name
+    print(f"Stored selected_name: {selected_name}")
+    return jsonify({"message": "success"})
+
+@app.route('/image_prompts')
+def image_prompts():
+    selected_name = description_data.get('selected_name', 'No Name Selected')  
+    return render_template('image_prompts.html', selected_name=selected_name)
+
+
+@app.route('/generate_logos', methods=['POST'])
+def generate_logos():
+    global description_data
+    data = request.get_json()  
+    print("Received data for logo generation:", data) 
     # print(data)
-    name = data.get("name")
-    new_images = generate_images(name)
+    selected_name = data.get("selected_name")
+    description_data["selected_name"] = selected_name
+    image_prompt1 = data.get("image_prompt1")
+    image_prompt2 = data.get("image_prompt2")
+    image_prompt3 = data.get("image_prompt3")
+    image_prompt4 = data.get("image_prompt4")
+    logo_count = int(data.get("logo_count", 1))
+    
+    final_prompt = f"Create a logo for the product '{selected_name}'. "
+    final_prompt += f"Image details: {image_prompt1}, {image_prompt2}, {image_prompt3}, {image_prompt4}."
 
-    for i in new_images:
-        description_data["generations"].append(i) 
-
+    logos = generate_images_for_logo(final_prompt, logo_count)
+    description_data["generations"] = logos
     #just send new images
-    return jsonify(new_images)
+    return jsonify(logos)
 
 
-def generate_images(name):
-    prompt = f"Generate an image for the product name: {name}" 
+def generate_images_for_logo(prompt, count):
+    images = []
+    for i in range(count):
+        response_image = client.images.generate(
+        prompt=prompt,
+        n=1,
+        size="512x512",
+        )
 
-    response_image = client.images.generate(
-      prompt=prompt,
-      n=1,
-      size="256x256",
-    )
+        url = response_image.data[0].url
+        images.append({"prompt": prompt, "url": url})
 
-    url = response_image.data[0].url
-
-    images = [
-        {
-            "prompt": name,
-            "url": url, #image_file.as_posix(),
-        }
-    ]
-    # print(url_for_flask)
     return images
+
+@app.route('/view_logos')
+def view_logos():
+    global description_data  
+    selected_name =  description_data.get("selected_name", "Unknown Product")
+    logos = description_data.get("generations", [])
+    print(f"Selected name in view_logos: {selected_name}")
+    return render_template('view_logos.html', logos=logos, selected_name=selected_name)
+
 
 @app.route('/')
 def home():
