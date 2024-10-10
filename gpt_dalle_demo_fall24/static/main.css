@@ -25,6 +25,110 @@ Waiting Ajax stuff
   z-index: 2;
 }
 
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #007bff;
+}
+
+#display_names .name-button {
+    margin: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: all 0.3s ease-in-out;
+}
+
+#display_names .name-button:hover {
+    background-color: #007bff;
+    color: white;
+    box-shadow: 0px 4px 6px rgba(0, 123, 255, 0.2);
+}
+
+#display_names .name-button:focus {
+    outline: none;
+    box-shadow: 0px 0px 10px rgba(0, 123, 255, 0.5);
+}
+
+#display_names {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.btn-primary, .btn-info, .btn-secondary {
+    background-image: linear-gradient(45deg, #007bff, #00c6ff);
+    border: none;
+    color: white;
+    transition: background 0.3s ease;
+}
+
+.btn-primary:hover, .btn-info:hover, .btn-secondary:hover {
+    background-image: linear-gradient(45deg, #00c6ff, #007bff);
+    box-shadow: 0px 4px 10px rgba(0, 123, 255, 0.3);
+}
+
+.btn i {
+    margin-right: 8px;
+}
+
+.card {
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.submitted-section h5 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.submitted-text {
+    font-size: 1rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+
+.form-text.text-muted {
+    font-style: italic;
+    color: #adb5bd;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.btn-block {
+    display: inline-block;
+    width: auto;
+    margin-top: 1rem;
+}
+
+.btn-group-vertical .btn {
+    margin-bottom: 0.5rem;
+    border-radius: 30px;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+/* Hover state for name buttons */
+.btn-group-vertical .btn:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Active/selected name state */
+.btn-group-vertical .btn.active {
+    background-color: #007bff;
+    color: white;
+}
+
+
 
 /*.title{
     font-size:  2em;

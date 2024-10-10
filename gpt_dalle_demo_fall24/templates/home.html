@@ -46,6 +46,7 @@
                 let prompt2 = $("#prompt2_input").val()
                 let prompt3 = $("#prompt3_input").val()
                 let prompt4 = $("#prompt4_input").val()
+                
                 submit_prompts(prompt1, prompt2, prompt3, prompt4)
             })
         });
@@ -186,47 +187,91 @@
                 }
             });
         }
+
     </script> 
     <div class="container">
         <div class="row mt-5">
             <!-- Edit Prompts Section, initially hidden -->
             <div class="col-lg-6 mx-auto" id="edit_prompts_card" style="display: none;">
                 <div class="card p-4 shadow-sm">
-                    <h3 class="mb-4">Edit Prompts</h3>
+                    <h3 class="text-primary mb-4">Let's create a unique logo name!</h3>
                     <div id="edit_prompts_div">
                         <div class="form-group">
-                            <label for="prompt1_input">Prompt 1:</label>
-                            <textarea id="prompt1_input" class="form-control" rows="2"></textarea>
+                            <label for="prompt1_input">
+                                <i class="fas fa-tint"></i> Please describe the core value and unique features of your product or service. For example: simplicity, speed, innovation
+                            </label>
+                            <textarea id="prompt1_input" class="form-control" rows="4" placeholder="e.g., My App Helps users track daily activities and diet for a healthier lifestyle. It focus on simplicity and motivation..."></textarea>
+                            <small class="form-text text-muted">Example: simplicity, speed, innovation.</small>
                         </div>
                         <div class="form-group">
-                            <label for="prompt2_input">Prompt 2:</label>
-                            <textarea id="prompt2_input" class="form-control" rows="4"></textarea>
+                            <label for="prompt2_input">
+                                <i class="fas fa-shield-alt"></i> Who is your target audience?
+                            </label>
+                            <textarea id="prompt2_input" class="form-control" rows="4" placeholder="e.g., The target audience includes anyone who wants to improve their fitness and eating habits, especially young adults and professionals..."></textarea>
+                            <small class="form-text text-muted">Example: young people, professionals, families.</small>
                         </div>
                         <div class="form-group">
-                            <label for="prompt3_input">Prompt 3:</label>
-                            <textarea id="prompt3_input" class="form-control" rows="4"></textarea>
+                            <label for="prompt3_input">
+                                <i class="fas fa-atom"></i> What kind of emotion or impression would you like the product name to convey?
+                            </label>
+                            <textarea id="prompt3_input" class="form-control" rows="4" placeholder="e.g., I want the name to feel motivating, inspiring, and focused on health and wellness..."></textarea>
+                            <small class="form-text text-muted">Example: reliability, stylishness, technological edge.</small>
                         </div>
                         <div class="form-group">
-                            <label for="prompt4_input">Prompt 4:</label>
-                            <textarea id="prompt4_input" class="form-control" rows="4"></textarea>
+                            <label for="prompt4_input"> 
+                                <i class="fas fa-bolt"></i> Are there any brand name styles you particularly like?
+                            </label>
+                            <textarea id="prompt4_input" class="form-control" rows="4" placeholder="e.g., I prefer names that are short, memorable, and reflect the health aspect—something that sounds fresh and active..."></textarea>
+                            <small class="form-text text-muted">Example: short and simple, creative and unique, tech-oriented.</small>
                         </div>
-                        <button id="submit_prompts_btn" class="btn btn-primary">Submit</button>
+                        <button id="submit_prompts_btn" class="btn btn-primary btn-block">
+                            <i class="fas fa-paper-plane"></i> Submit
+                        </button>
                     </div>
                 </div>
             </div>
-    
-            <!-- Row containing Submitted Prompts and Select a Name side by side -->
+            
+            <!-- Submitted Prompts and Select a Name -->
             <div class="row mt-5">
                 <div class="col-md-6">
                     <!-- Submitted Prompts Section -->
                     <div class="card p-4 shadow-sm" id="show_prompts_card" style="display: none;">
-                        <h3 class="mb-4">Submitted Prompts</h3>
+                        <h3 class="text-primary mb-4">Your Responses</h3>
                         <div id="show_prompts_div">
-                            <p><strong>Prompt 1: </strong><span id="show_prompt1"></span></p>
-                            <p><strong>Prompt 2: </strong><span id="show_prompt2"></span></p>
-                            <p><strong>Prompt 3: </strong><span id="show_prompt3"></span></p>
-                            <p><strong>Prompt 4: </strong><span id="show_prompt4"></span></p>
-                            <button id="edit_prompts_btn" class="btn btn-secondary">Edit</button>
+                            <div class="submitted-section">
+                                <h5><strong>
+                                    <i class="fas fa-circle"></i> Core Value & Unique Features:
+                                </strong></h5>
+                                <p id="show_prompt1" class="submitted-text"></p>
+                            </div>
+                            <hr>
+                            <div class="submitted-section">
+                                <h5><strong>
+                                    <i class="fas fa-circle"></i> Target Audience:
+                                </strong></h5>
+                                <p id="show_prompt2" class="submitted-text"></p>
+                            </div>
+                            <hr>
+                            <div class="submitted-section">
+                                <h5><strong>
+                                    <i class="fas fa-circle"></i> Emotion or Impression:
+                                </strong></h5>
+                                <p id="show_prompt3" class="submitted-text"></p>
+                            </div>
+                            <hr>
+                            <div class="submitted-section">
+                                <h5><strong>
+                                    <i class="fas fa-circle"></i> Brand Name Style:
+                                </strong></h5>
+                                <p id="show_prompt4" class="submitted-text"></p>
+                            </div>
+                            <hr>
+                            <div class="text-left mt-3">
+                                <button id="edit_prompts_btn" class="btn btn-secondary btn-block">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                            </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -234,11 +279,16 @@
                 <!-- Select a Name Section -->
                 <div class="col-md-6">
                     <div class="card p-4 shadow-sm" id="names_to_select_card" style="display: none;">
-                        <h3 class="mb-4">Select a Name</h3>
+                        <h3 class="text-primary mb-4">Select a Name</h3>
                         <div id="names_to_select">
-                            <p><strong>Names: </strong><button type="button" id="get_names" class="btn btn-info btn-sm">Get Names</button></p>
+                            <button type="button" id="get_names" class="btn btn-info btn-block">
+                                <i class="fas fa-heartbeat"></i> Get Names
+                            </button>
                             <div id="display_names"></div>
-                            <p class="text-muted">Click your name and generate your image.</p>
+                            <!-- Display generated names here -->
+                            <div id="display_names" class="btn-group-vertical" role="group" aria-label="Name Selection"></div>
+
+                            <p class="text-muted">Click on a name to proceed with logo generation.</p>
                         </div>
                     </div>
                 </div>

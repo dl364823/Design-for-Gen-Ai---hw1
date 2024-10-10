@@ -46,7 +46,7 @@ sample_description_data_1 = {
 
 
 #### INIT with example data
-description_data = sample_description_data_1
+#description_data = sample_description_data_1
 
 @app.route('/submit_prompts', methods=['GET', 'POST'])
 def submit_prompts():
